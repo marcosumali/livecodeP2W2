@@ -181,10 +181,14 @@
               localStorage.setItem("token", token);
               // console.log(result, '====')
               // console.log(token,'this is token');
+              alertify.success('Get Token Successful !');
 
             })
             .catch(err => {
+
               console.log(err)
+              alertify.error('Get Token Error');
+
             })
         },
 
@@ -203,12 +207,14 @@
 
               this.arrimage = result.data.images;
               console.log('from get images',this.arrimage);
+              alertify.success('Get Image Successful !');
 
             })
             .catch(err => {
 
               console.log('from get images',err)
-              
+              alertify.error('Get Image Error: Please request token :D');
+
             })
 
         },
@@ -238,6 +244,7 @@
             .catch(err => {
 
               console.log('from post image',err)
+              alertify.error('Post Error');
 
             })
 
