@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+  <!-- JQuery -->
+  <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+
+  <!-- CSS Alertify -->
+  <script src="//cdn.jsdelivr.net/npm/alertifyjs@1.11.1/build/alertify.min.js"></script>
+  <!-- RTL version -->
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.1/build/css/alertify.rtl.min.css"/>
+  <!-- Default theme -->
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/alertifyjs@1.11.1/build/css/themes/default.rtl.min.css"/>
+    
+  <!-- VueJS -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+  <!--Import Google Icon Font-->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <!-- Axios -->
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    
+  <!-- Semantic CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/semantic-ui@2.3.1/dist/semantic.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.3.1/dist/semantic.min.js"></script>
+
+  <link rel="stylesheet" href="./assets/css/index.css">
+
+  <title>LivecodeForLife.com</title>
+
+</head>
+
+<body>
+
+  <section id="app">
+    <!-- =====================================================SECTION NAVBAR===================================================== -->
+    <div class="ui secondary pointing menu">
+      <a class="item active">
+        LivecodeForLife.com
+      </a>
+      <a class="item" @click="openMPost">
+        New Post
+      </a>
+      <div class="right menu">
+        <a class="ui item" @click="openMToken">
+          Request Token
+        </a>
+      </div>
+    </div>
+    <!-- <div class="ui segment">
+      <p>abc</p>
+    </div> -->
+
+    <!-- =====================================================MODAL TOKEN===================================================== -->
+    <div class="ui modal" id="modal_token" >
+      <i class="close icon"></i>
+      <div class="header">
+        Request Token
+      </div>
+        <p>Email: </p><input type="text" placeholder="Your email..." v-model="email">    
+        <p>Name : </p><input type="text" placeholder="Your name..."  v-model="name">
+      <div class="actions">
+        <div class="ui black deny button">
+          Cancel
+        </div>
+        <div class="ui positive right labeled icon button" @click="getToken">
+          Get Token
+          <i class="checkmark icon"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================MODAL NEW POST===================================================== -->
+    <div class="ui modal" id="modal_newpost" >
+      <i class="close icon"></i>
+      <div class="header">
+        New Post
+      </div>
+        <p>Photo : </p><input type="file" placeholder=""  id="image">
+      <div class="actions">
+        <div class="ui black deny button">
+          Cancel
+        </div>
+        <div class="ui positive right labeled icon button" @click="postImage">
+          Post Image
+          <i class="checkmark icon"></i>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================SECTION CONTENT===================================================== -->
+    <div class="container-head ui grid">
+      <div class="container-grid four wide column" v-for="item in arrimage">
+        <div class="container-card">
+          <div class="ui card">
+            <div class="content">
+              <p>{{ item.user.name }}</p>
+            </div>
+            <div class="image">
+              <img :src="item.url">
+            </div>
+            <div class="content">
+              <button class="ui icon button right floated">
+                <i class="cloud download icon"></i>
+              </button>
+              <div class="ui red button">
+                <i class="heart icon"></i> Like
+              </div>
+              <a class="ui basic red left pointing label next">
+                1,048
+              </a>
+            </div>
+            <div class="extra content">
+              <div class="ui large transparent left icon input">
+                <div class="left floated">
+                  <i class="heart outline icon"></i>
+                </div>
+                <p>LivecodeForLive.com</p>
+              </div>
+            </div>
+          </div>   
+        </div>     
+      </div>
+    </div>
+
+
+    <!-- =====================================================SECTION FOOTER===================================================== -->
+    <footer>
+      <p>© 2018 LivecodeForLife.com</p>
+    </footer>
+
+  </section>
+
+  <script>
+    new Vue({
+      el: '#app',
+      data: {
+        email: '',
+        name: '',
+        arrimage: '',
+        photo: ''
+      },
+      component: {
+
+      },
+      created: function() {
+
+        this.getImages();
+
+      },
+      methods: {
+        openMToken: function () {
+
+          $('#modal_token').modal('show');
+        
+        },
+
+        openMPost: function () {
+
+          $('#modal_newpost').modal('show');
+
+        },
+
+        getToken: function () {
+
+          let obj = {
+            email: this.email,
+            name: this.name
+          }
+          // console.log(obj);
+
+          axios.post('http://35.198.212.156/request-token', obj)
+            .then(result => {
+
+              let token = result.data.user.uid;
+              localStorage.setItem("token", token);
+              // console.log(result, '====')
+              // console.log(token,'this is token');
+
+            })
+            .catch(err => {
+              console.log(err)
+            })
+        },
+
+        getImages: function () {
+
+          let token = localStorage.getItem("token")
+
+          let config = {
+            headers: {'authorization': token}
+          };
+          // console.log(token,'from getimages');
+          // console.log(config,'from getimages');
+
+          axios.get('http://35.198.212.156/api/image', config)
+            .then(result => {
+
+              this.arrimage = result.data.images;
+              console.log('from get images',this.arrimage);
+
+            })
+            .catch(err => {
+
+              console.log('from get images',err)
+              
+            })
+
+        },
+
+        postImage: function () {
+
+          let token = localStorage.getItem("token")
+
+          let config = {
+            headers: {'authorization': token}
+          };
+
+          let fileInput = document.querySelector('#image');
+          // console.log(fileInput);
+
+          var formData = new FormData()
+          formData.append('photo', fileInput.files[0]);
+
+          axios.post('http://35.198.212.156/api/image', formData, config)
+            .then(result => {
+
+              console.log('from post image',result)
+              alertify.success('New Post Successful !');
+              // window.location.reload();
+
+            })
+            .catch(err => {
+
+              console.log('from post image',err)
+
+            })
+
+        }
+
+      }
+    })
+
+  </script>
+
+</body>
+
+</html>
